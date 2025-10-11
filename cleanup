@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+echo "Cleaning up temporary libBigWig build files..."
+rm -rf src/libBigWig-0.4.7 src/libBigWig.tar.gz
+

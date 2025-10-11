@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -e
+
+echo "=== Configuring bwimport ==="
+
+# Move to src/
+cd src
+
+# If libBigWig.a is already here, skip
+if [ -f "libBigWig.a" ]; then
+  echo "libBigWig.a already exists — skipping build."
+  exit 0
+fi
+
+echo "libBigWig.a not found — downloading and building libBigWig..."
+
+# Download and extract
+curl -L -o libBigWig.tar.gz https://github.com/dpryan79/libBigWig/archive/refs/tags/0.4.7.tar.gz
+tar -xzf libBigWig.tar.gz
+cd libBigWig-0.4.7
+
+# Build with curl + zlib support
+brew_prefix_curl=$(brew --prefix curl 2>/dev/null || echo "/usr")
+brew_prefix_zlib=$(brew --prefix zlib 2>/dev/null || echo "/usr")
+
+echo "Using curl: ${brew_prefix_curl}"
+echo "Using zlib: ${brew_prefix_zlib}"
+
+USE_CURL=1 \
+CFLAGS="-O3 -fPIC -I${brew_prefix_curl}/include -I${brew_prefix_zlib}/include" \
+LDFLAGS="-L${brew_prefix_curl}/lib -L${brew_prefix_zlib}/lib" \
+make -j4
+
+# Copy library + header back to src/
+cp libBigWig.a ../
+cp bigWig.h ../
+
+cd ..
+rm -rf libBigWig-0.4.7 libBigWig.tar.gz
+
+echo "=== libBigWig built and placed in src/ ==="
+

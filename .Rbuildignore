@@ -8,3 +8,7 @@
 ^src/.*\.so$
 ^src/.*\.dll$
 ^bwimport\.Rcheck$
+^configure$
+^cleanup$
+^src/libBigWig-0.4.7/
+^src/libBigWig.tar.gz$

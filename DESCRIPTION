@@ -8,5 +8,5 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LinkingTo: Rcpp
 Imports: Rcpp (>= 1.0.10)
-SystemRequirements: zlib, libcurl
+SystemRequirements: zlib, curl (libBigWig is built automatically if missing)
 LazyData: true
