@@ -5,7 +5,7 @@ R package that uses C++ to import data from bigwig files either local or remote
 ## Installation
 ```r
 # install.packages("remotes")
-remotes::install_github("your-username/bwimport")
+remotes::install_github("slaish/bwimport")
 
 ### Example
 library(bwimport)
