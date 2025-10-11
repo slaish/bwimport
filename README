@@ -1,0 +1,12 @@
+# bwimport
+
+R package that uses C++ to import data from bigwig files either local or remote
+
+## Installation
+```r
+# install.packages("remotes")
+remotes::install_github("your-username/bwimport")
+
+### Example
+library(bwimport)
+vals <- bw_import("example.bw", "chr1", 1000, 2000)
