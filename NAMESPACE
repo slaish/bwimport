@@ -1,0 +1,3 @@
+useDynLib(bwimport, .registration=TRUE)
+importFrom(Rcpp, evalCpp)
+export(bw_import)
