@@ -1,0 +1,10 @@
+^\.git$
+^\.github$
+^\.Rproj$
+^\.Rproj\.user$
+^README\.Rmd$
+^\.DS_Store$
+^src/.*\.o$
+^src/.*\.so$
+^src/.*\.dll$
+^bwimport\.Rcheck$
