@@ -9,4 +9,11 @@ remotes::install_github("slaish/bwimport")
 
 ### Example
 library(bwimport)
-vals <- bw_import("example.bw", "chr1", 1000, 2000)
+bw_URL = "http://genome-ftp.mbg.au.dk/public/THJ/seqNdisplayR/examples/tracks/HeLa_3pseq/siGFP_noPAP_in_batch1_plus.bw"
+
+chrom = "chr12"
+chrom_start = 6531808
+chrom_end = 6541078
+
+vals = bw_import(bw_file, chrom, chrom_start, chrom_end)
+
