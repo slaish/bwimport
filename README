@@ -15,5 +15,5 @@ chrom = "chr12"
 chrom_start = 6531808
 chrom_end = 6541078
 
-vals = bw_import(bw_file, chrom, chrom_start, chrom_end)
+vals = bw_import(bw_URL, chrom, chrom_start, chrom_end)
 
