@@ -1,3 +1,8 @@
-PKG_CPPFLAGS += -I. $(shell Rscript -e "Rcpp:::CxxFlags()") $(shell Rscript -e "cat(curl::curl_config()$includes)")
-PKG_LIBS += $(shell Rscript -e "cat(curl::curl_config()$libs)") $(shell Rscript -e "Rcpp:::LdFlags()")
+# Include headers
+PKG_CPPFLAGS += -I. $(shell Rscript -e "cat(Rcpp:::CxxFlags())") \
+                   $(shell Rscript -e "cat(curl::curl_config()[['includes']])")
+
+# Link against curl and zlib provided by curl package
+PKG_LIBS += $(shell Rscript -e "cat(curl::curl_config()[['libs']])") \
+            $(shell Rscript -e "cat(Rcpp:::LdFlags())")
 
