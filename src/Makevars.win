@@ -1,5 +1,5 @@
 PKG_CPPFLAGS = $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "Rcpp:::CxxFlags()")
+
 PKG_LIBS = $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "Rcpp:::LdFlags()") \
-  -LC:/rtools45/x86_64-w64-mingw32.static.posix/lib \
-  -LC:/rtools45/x86_64-w64-mingw32.static.posix/lib/x64 \
-  -lcurl -lssl -lcrypto -lz -lws2_32 -lcrypt32 -lwldap32
+  $(shell "${R_HOME}/bin${R_ARCH_BIN}/R CMD config --ldflags --cppflags libcurl") \
+  -lz
