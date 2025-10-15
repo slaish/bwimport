@@ -1,3 +1,3 @@
-PKG_CPPFLAGS += -I. $(shell ${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()" | tr -d '\n')
-PKG_LIBS += -lz -lcurl $(shell ${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()" | tr -d '\n')
+PKG_CPPFLAGS += -I. $(shell Rscript -e "Rcpp:::CxxFlags()") $(shell Rscript -e "cat(curl::curl_config()$includes)")
+PKG_LIBS += $(shell Rscript -e "cat(curl::curl_config()$libs)") $(shell Rscript -e "Rcpp:::LdFlags()")
 
