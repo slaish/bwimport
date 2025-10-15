@@ -1,2 +1,6 @@
-PKG_CPPFLAGS += -I.
-PKG_LIBS += libBigWig.a -lz -lcurl
+# Include current directory headers and Rcpp headers
+PKG_CPPFLAGS += -I. $(shell ${R_HOME}/bin/Rscript -e "Rcpp:::CxxFlags()" | tr -d '\n')
+
+# Link against system libraries
+PKG_LIBS += -lz -lcurl $(shell ${R_HOME}/bin/Rscript -e "Rcpp:::LdFlags()" | tr -d '\n')
+

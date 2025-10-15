@@ -3,12 +3,13 @@
 ^\.Rproj$
 ^\.Rproj\.user$
 ^README\.Rmd$
-^\.DS_Store$
-^src/.*\.o$
-^src/.*\.so$
-^src/.*\.dll$
 ^bwimport\.Rcheck$
 ^configure$
 ^cleanup$
-^src/libBigWig-0.4.7/
-^src/libBigWig.tar.gz$
+^src/.*\.o$        # object files
+^src/.*\.so$       # shared library macOS/Linux
+^src/.*\.dll$      # shared library Windows
+^src/libBigWig-0\.4\.7/  # old library source folder
+^src/libBigWig\.tar\.gz$ # old tarball
+^src/libBigWig\.a$       # old static archive
+^\.DS_Store$       # macOS system files
