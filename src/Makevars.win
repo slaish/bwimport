@@ -1,5 +1,4 @@
 PKG_CPPFLAGS += -I. $(shell Rscript -e "cat(Rcpp:::CxxFlags())")
 
-PKG_LIBS += $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "Rcpp:::LdFlags()") \
-            -L"$(R_HOME)/bin$(R_ARCH_BIN)" \
-            -lcurl -lz
+# On Windows, R already links with curl internally — don't add -lcurl
+PKG_LIBS += -lz $(shell Rscript -e "cat(Rcpp:::LdFlags())")
