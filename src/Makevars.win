@@ -1,4 +1,4 @@
-PKG_CPPFLAGS += -I. $(shell Rscript -e "cat(Rcpp:::CxxFlags())")
-
-# On Windows, R already links with curl internally — don't add -lcurl
-PKG_LIBS += -lz $(shell Rscript -e "cat(Rcpp:::LdFlags())")
+## src/Makevars.win  — build without libcurl on Windows
+## We compile libBigWig sources in src/ and disable curl paths.
+PKG_CPPFLAGS += -I. -DNOCURL
+PKG_LIBS     += -lz
