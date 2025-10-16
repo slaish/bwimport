@@ -1,6 +1,5 @@
-# Use Rcpp flags for headers
 PKG_CPPFLAGS += -I. $(shell Rscript -e "cat(Rcpp:::CxxFlags())")
 
-# Hardcode linking to zlib and curl
-PKG_LIBS += -lcurl -lz $(shell Rscript -e "cat(Rcpp:::LdFlags())")
-
+PKG_LIBS += $(shell "${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" -e "Rcpp:::LdFlags()") \
+            -L"$(R_HOME)/bin$(R_ARCH_BIN)" \
+            -lcurl -lz
