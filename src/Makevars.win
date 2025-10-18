@@ -1,4 +1,11 @@
-## src/Makevars.win  — build without libcurl on Windows
-## We compile libBigWig sources in src/ and disable curl paths.
-PKG_CPPFLAGS += -I. -DNOCURL
-PKG_LIBS     += -lz
+## src/Makevars.win  — Windows: build from vendored sources, link curl+zlib
+
+# Include our headers in src/
+PKG_CPPFLAGS += -I.
+ 
+# Let R compile the .c files present in src/ (bwRead.c, bwStats.c, bwValues.c, bwWrite.c, io.c)
+# Nothing special to list: R compiles all .c/.cpp into .o automatically.
+ 
+# Link the Windows libcurl and zlib (ucrt64)
+# These flags will be finalized by configure.win (below) if pkg-config is available.
+PKG_LIBS += -lcurl -lz

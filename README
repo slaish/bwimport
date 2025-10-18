@@ -15,5 +15,11 @@ chrom = "chr12"
 chrom_start = 6531808
 chrom_end = 6541078
 
-vals = bw_import(bw_URL, chrom, chrom_start, chrom_end)
+vals = bw_import(bw_URL, chrom, chrom_start, chrom_end) # [1] 9503.29
 
+
+On Windows (R 4.5.x + Rtools 4.5), open "Rtools bash (ucrt64)" and run:
+  pacman -S --needed --noconfirm mingw-w64-ucrt-x86_64-curl mingw-w64-ucrt-x86_64-zlib
+ 
+Then install:
+  remotes::install_github("slaish/bwimport")      # or your meta-package
