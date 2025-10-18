@@ -1,0 +1,60 @@
+#!/usr/bin/env sh
+ 
+# Fail fast on unset variables and errors
+set -eu
+ 
+echo "==> configure.win: probing for libcurl and zlib (ucrt64)"
+ 
+# Prefer pkg-config if available (it is, when Rtools ucrt64/bin is on PATH)
+if command -v pkg-config >/dev/null 2>&1; then
+  CURL_CFLAGS="$(pkg-config --cflags libcurl 2>/dev/null || true)"
+  CURL_LIBS="$(pkg-config --libs libcurl 2>/dev/null || true)"
+else
+  CURL_CFLAGS=""
+  CURL_LIBS=""
+fi
+ 
+if [ -n "${CURL_LIBS}" ]; then
+  echo "    libcurl found via pkg-config"
+  # Write a toolchain-specific Makevars that augments flags
+  cat > src/Makevars.ucrt <<EOF
+PKG_CPPFLAGS += ${CURL_CFLAGS}
+PKG_LIBS     += ${CURL_LIBS}
+EOF
+  exit 0
+fi
+ 
+# Fallback: try the default Rtools 4.5 paths (ucrt64)
+# Adjust if your org uses a different install path.
+RTOOLS="${RTOOLS45_HOME:-/c/rtools45}"
+if [ -d "$RTOOLS/ucrt64/include" ] && [ -d "$RTOOLS/ucrt64/lib" ]; then
+  echo "    pkg-config not found or curl not registered; trying ${RTOOLS}/ucrt64"
+  cat > src/Makevars.ucrt <<EOF
+PKG_CPPFLAGS += -I"${RTOOLS}/ucrt64/include"
+PKG_LIBS     += -L"${RTOOLS}/ucrt64/lib" -lcurl -lz
+EOF
+  exit 0
+fi
+ 
+# If we get here, curl dev libs were not found.
+# Choose ONE behavior:
+#   (A) Hard fail with clear instructions (recommended for performance)
+#   (B) Soft fallback to -DNOCURL (remote URLs will NOT work fast)
+ 
+# (A) Hard fail (uncomment this block to enforce)
+cat <<MSG 1>&2
+ERROR: libcurl development files not found.
+       Please open "Rtools bash (ucrt64)" and run:
+         pacman -S --needed --noconfirm mingw-w64-ucrt-x86_64-curl mingw-w64-ucrt-x86_64-zlib
+       Then reinstall this package.
+MSG
+exit 1
+ 
+# (B) Soft fallback (commented out by default)
+# echo "    WARNING: libcurl not found; building without curl (NOCURL). Remote URLs will be slow/unsupported." 1>&2
+# cat > src/Makevars.ucrt <<EOF
+# PKG_CPPFLAGS += -I. -DNOCURL
+# PKG_LIBS     += -lz
+# EOF
+# exit 0
+
