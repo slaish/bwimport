@@ -7,16 +7,16 @@
 bw_import(bw_file, chrom, start, end)
 }
 \arguments{
-\item{bw_file}{path or URL}
+\item{bw_file}{Character scalar: path to a local BigWig or a URL (http/https/ftp)}
 
-\item{chrom}{chromosome (e.g., "chr12")}
+\item{chrom}{Character scalar: chromosome name (e.g., "chr1")}
 
-\item{start}{1-based start}
+\item{start}{Integer(1): 1-based start (inclusive)}
 
-\item{end}{1-based end inclusive}
+\item{end}{Integer(1): 1-based end (inclusive)}
 }
 \value{
-numeric vector of length end-start+1
+Numeric vector of length end - start + 1
 }
 \description{
 Import BigWig region
