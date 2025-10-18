@@ -24,9 +24,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// bw_cleanup
+void bw_cleanup();
+RcppExport SEXP _bwimport_bw_cleanup() {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    bw_cleanup();
+    return R_NilValue;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_bwimport_bw_import_impl", (DL_FUNC) &_bwimport_bw_import_impl, 4},
+    {"_bwimport_bw_cleanup", (DL_FUNC) &_bwimport_bw_cleanup, 0},
     {NULL, NULL, 0}
 };
 

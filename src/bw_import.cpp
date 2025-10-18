@@ -106,6 +106,12 @@ NumericVector bw_import_impl(std::string bw_file, std::string chrom, int start, 
   bwClose(bw);
   return out;
 }
+
+// [[Rcpp::export]]
+void bw_cleanup() {
+  bwCleanup();
+  bw_ready.store(false);
+}
  
 // --- Cleanup hook: called when the DLL/SO unloads ---------------------------
 extern "C" void R_unload_bwimport(DllInfo* /*dll*/) {

@@ -5,3 +5,7 @@ bw_import_impl <- function(bw_file, chrom, start, end) {
     .Call(`_bwimport_bw_import_impl`, bw_file, chrom, start, end)
 }
 
+bw_cleanup <- function() {
+    invisible(.Call(`_bwimport_bw_cleanup`))
+}
+
