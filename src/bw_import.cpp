@@ -6,6 +6,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <list>
+#include <memory>
 
 extern "C" {
   #include "bigWig.h"
