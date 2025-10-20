@@ -21,3 +21,20 @@ Numeric vector of length end - start + 1
 \description{
 Import BigWig region
 }
+\examples{
+bw_URL = "http://genome-ftp.mbg.au.dk/public/THJ/seqNdisplayR/examples/tracks/HeLa_3pseq/siGFP_noPAP_in_batch1_plus.bw"
+chrom = "chr12"
+chrom_start = 6531808
+chrom_end = 6541078
+vals = bw_import(bw_URL, chrom, chrom_start, chrom_end)
+max(vals) # [1] 9503.29
+
+On Windows - tune import timing through the following
+1) Bigger buffer
+Sys.setenv(BWIMPORT_BUFSZ_KB = "4096")  # 4 MiB
+2) Force IPv4
+Sys.setenv(BWIMPORT_IPRESOLVE = "4")
+3) Optional: fresh sockets (only if still slow)
+# Sys.setenv(BWIMPORT_FRESH = "1")
+If there is a big drop, BUFSZ can be dialed down (to e.g. 2048) to balance memory/throughput.
+}
