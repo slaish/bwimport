@@ -30,6 +30,32 @@ static void bw_curl_apply_common_opts(CURL *h) {
  
     /* Safer in threaded/Windows envs */
     curl_easy_setopt(h, CURLOPT_NOSIGNAL, 1L);
+    /* Prefer IPv4/IPv6 via env: BWIMPORT_IPRESOLVE="4" or "6" (default: libcurl decides) */
+    {
+      const char* ip = getenv("BWIMPORT_IPRESOLVE");
+      if (ip && ip[0] == '4')
+        curl_easy_setopt(h, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+      else if (ip && ip[0] == '6')
+        curl_easy_setopt(h, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
+    }
+    
+    /* Disable Nagle (speeds many small range reads) */
+    curl_easy_setopt(h, CURLOPT_TCP_NODELAY, 1L);
+    
+    /* Larger recv buffer helps on Windows */
+    curl_easy_setopt(h, CURLOPT_BUFFERSIZE, 262144L);  /* 256 KiB */
+    
+    /* Don’t advertise compression for binary ranged reads */
+    curl_easy_setopt(h, CURLOPT_ACCEPT_ENCODING, "identity");
+    
+    /* Skip 100-continue dance */
+    curl_easy_setopt(h, CURLOPT_EXPECT_100_TIMEOUT_MS, 0L);
+    
+    /* Optional: force fresh TCP connection per request if BWIMPORT_FRESH is set */
+    if (getenv("BWIMPORT_FRESH")) {
+      curl_easy_setopt(h, CURLOPT_FORBID_REUSE, 1L);
+      curl_easy_setopt(h, CURLOPT_FRESH_CONNECT, 1L);
+    }
  
     /* Last resort if a proxy/CDN misbehaves:
        curl_easy_setopt(h, CURLOPT_FORBID_REUSE, 1L);

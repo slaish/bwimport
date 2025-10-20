@@ -17,7 +17,17 @@ static std::atomic<bool> bw_ready(false);
 inline void ensure_bw_init() {
   bool expected = false;
   if (bw_ready.compare_exchange_strong(expected, true)) {
-    if (bwInit(1u << 17) != 0) {       // first caller does the init
+    // Allow override via env: BWIMPORT_BUFSZ_KB (default 1024 KB)
+    size_t kb = 0;
+    if (const char* s = std::getenv("BWIMPORT_BUFSZ_KB")) {
+      long v = std::strtol(s, nullptr, 10);
+      if (v > 0) kb = static_cast<size_t>(v);
+    }
+    size_t bytes = (kb ? kb * 1024u : (1u << 20));   // default 1 MiB
+    if (bytes < (1u << 16)) bytes = (1u << 16);      // min 64 KiB
+    if (bytes > (1u << 23)) bytes = (1u << 23);      // max 8 MiB
+    
+    if (bwInit((uint32_t)bytes) != 0) {
       bw_ready.store(false);
       stop("Failed to initialize libBigWig.");
     }
