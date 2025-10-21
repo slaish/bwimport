@@ -96,6 +96,19 @@ CURLcode urlFetchData(URL_t *URL, unsigned long bufSize) {
  
     rv = curl_easy_perform(URL->x.curl);
     errno = 0; /* clear remnant errno */
+    
+    const char* dbg = getenv("BWIMPORT_DEBUG_CURL");
+    if (dbg && dbg[0] == '1') {
+      double ttot = 0.0, dlsz = 0.0;
+      long   code = 0;
+      char  *eff  = NULL;
+      curl_easy_getinfo(URL->x.curl, CURLINFO_TOTAL_TIME, &ttot);
+      curl_easy_getinfo(URL->x.curl, CURLINFO_SIZE_DOWNLOAD, &dlsz);
+      curl_easy_getinfo(URL->x.curl, CURLINFO_RESPONSE_CODE, &code);
+      curl_easy_getinfo(URL->x.curl, CURLINFO_EFFECTIVE_URL, &eff);
+      fprintf(stderr, "[bwimport] FETCH range=%zu-%zu  time=%.3fs  dl=%.0fB  http=%ld  url=%s\n",
+              URL->filePos, URL->filePos + (size_t)bufSize - 1U, ttot, dlsz, code, eff ? eff : "(nil)");
+    }
     return rv;
 }
  
@@ -198,8 +211,22 @@ CURLcode urlSeek(URL_t *URL, size_t pos) {
             bw_curl_apply_common_opts(URL->x.curl);
  
             rv = curl_easy_perform(URL->x.curl);
+            
+            const char* dbg = getenv("BWIMPORT_DEBUG_CURL");
+            if (dbg && dbg[0] == '1') {
+             double ttot = 0.0, dlsz = 0.0;
+             long   code = 0;
+             char  *eff  = NULL;
+             curl_easy_getinfo(URL->x.curl, CURLINFO_TOTAL_TIME, &ttot);
+             curl_easy_getinfo(URL->x.curl, CURLINFO_SIZE_DOWNLOAD, &dlsz);
+             curl_easy_getinfo(URL->x.curl, CURLINFO_RESPONSE_CODE, &code);
+             curl_easy_getinfo(URL->x.curl, CURLINFO_EFFECTIVE_URL, &eff);
+             fprintf(stderr, "[bwimport] SEEK  range=%s  time=%.3fs  dl=%.0fB  http=%ld  url=%s\n",
+                     range, ttot, dlsz, code, eff ? eff : "(nil)");
+            }
+            
             if (rv != CURLE_OK) {
-                fprintf(stderr, "[urlSeek] curl_easy_perform received an error!\n");
+             fprintf(stderr, "[urlSeek] curl_easy_perform received an error!\n");
             }
             errno = 0;  /* clear remnant errno */
             return rv;
@@ -307,15 +334,8 @@ URL_t *urlOpen(const char *fname, CURLcode (*callBack)(CURL*), const char *mode)
                 }
             }
  
-            /* common Windows-friendly opts before first perform */
-            bw_curl_apply_common_opts(URL->x.curl);
+            /* (no warm-up perform here; first read/seek will fetch) */
  
-            code = curl_easy_perform(URL->x.curl);
-            errno = 0;
-            if (code != CURLE_OK) {
-                fprintf(stderr, "[urlOpen] curl_easy_perform error: %s\n", curl_easy_strerror(code));
-                goto error;
-            }
 #endif /* NOCURL */
         }
     } else {

@@ -37,6 +37,10 @@ inline void ensure_bw_init() {
     if (bwInit(buf) != 0) {
       bw_ready.store(false);
       stop("Failed to initialize libBigWig.");
+    } else {
+      if (const char* dbg = std::getenv("BWIMPORT_DEBUG_CURL")) {
+        if (dbg[0] == '1') Rcpp::Rcerr << "[bwimport] bwInit buffer = " << buf << " bytes\n";
+      }
     }
   }
 }
