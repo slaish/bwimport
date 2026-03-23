@@ -1,4 +1,5 @@
 useDynLib(bwimport, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
 export(bw_import)
+export(bw_import_impl)
 export(bw_cleanup)
