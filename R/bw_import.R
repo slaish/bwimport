@@ -56,5 +56,5 @@ bw_import <- function(bw_file, chrom, start, end) {
     bw_file <- normalizePath(bw_file, winslash = "/", mustWork = TRUE)
   }
 
-  bw_import_impl(bw_file, chrom, start, end)
+  bwimport::bw_import_impl(bw_file, chrom, start, end)
 }
