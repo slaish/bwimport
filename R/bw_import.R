@@ -14,13 +14,6 @@
 #' vals <- bw_import(bw_URL, chrom, chrom_start, chrom_end)
 #' max(vals) # [1] 9503.29
 #'
-#' # On Windows - tune import timing through the following
-#' # 1) Bigger buffer
-#' # Sys.setenv(BWIMPORT_BUFSZ_KB = "4096")  # 4 MiB
-#' # 2) Force IPv4
-#' # Sys.setenv(BWIMPORT_IPRESOLVE = "4")
-#' # 3) Optional: fresh sockets (only if still slow)
-#' # Sys.setenv(BWIMPORT_FRESH = "1")
 bw_import <- function(bw_file, chrom, start, end) {
   stopifnot(
     is.character(bw_file), length(bw_file) == 1L,
