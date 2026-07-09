@@ -1,3 +1,15 @@
+# bwimport 0.2.1
+
+## New features
+
+* All libBigWig `stderr` messages are now gated behind the `BWIMPORT_QUIET`
+  environment variable. When `BWIMPORT_QUIET` is set (to any value), the
+  vendored libBigWig prints (`[bwHdrRead] ...`, `[bwOpen] ...`, etc.) are
+  suppressed at the C level. Leave the variable unset to see full diagnostics.
+  This is intended for callers that already handle failures at the R level
+  (retry with alt chromosome name, all-zero fallback) and don't want the
+  cosmetic noise from transient first-attempt failures.
+
 # bwimport 0.2.0
 
 ## New features

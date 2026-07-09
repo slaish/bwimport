@@ -5,6 +5,7 @@
 #include <string.h>
 #include <zlib.h>
 #include <errno.h>
+#include "bw_quiet.h"
 
 static uint32_t roundup(uint32_t v) {
     v--;
@@ -30,7 +31,7 @@ static bwRTree_t *readRTreeIdx(bigWigFile_t *fp, uint64_t offset) {
 
     if(bwRead(&magic, sizeof(uint32_t), 1, fp) != 1) return NULL;
     if(magic != IDX_MAGIC) {
-        fprintf(stderr, "[readRTreeIdx] Mismatch in the magic number!\n");
+        BW_STDERR("[readRTreeIdx] Mismatch in the magic number!\n");
         return NULL;
     }
 
@@ -178,7 +179,7 @@ static bwOverlapBlock_t *overlapsLeaf(bwRTreeNode_t *node, uint32_t tid, uint32_
     }
 
     if(idx != o->n) { //This should never happen
-        fprintf(stderr, "[overlapsLeaf] Mismatch between number of overlaps calculated and found!\n");
+        BW_STDERR("[overlapsLeaf] Mismatch between number of overlaps calculated and found!\n");
         goto error;
     }
 
@@ -292,7 +293,7 @@ static bwOverlapBlock_t *bwGetOverlappingBlocks(bigWigFile_t *fp, const char *ch
     uint32_t tid = bwGetTid(fp, chrom);
 
     if(tid == (uint32_t) -1) {
-        fprintf(stderr, "[bwGetOverlappingBlocks] Non-existent contig: %s\n", chrom);
+        BW_STDERR("[bwGetOverlappingBlocks] Non-existent contig: %s\n", chrom);
         return NULL;
     }
 
@@ -476,7 +477,7 @@ bwOverlappingIntervals_t *bwGetOverlappingIntervalsCore(bigWigFile_t *fp, bwOver
     return output;
 
 error:
-    fprintf(stderr, "[bwGetOverlappingIntervalsCore] Got an error\n");
+    BW_STDERR("[bwGetOverlappingIntervalsCore] Got an error\n");
     if(output) bwDestroyOverlappingIntervals(output);
     if(compressed && buf) free(buf);
     if(compBuf) free(compBuf);
@@ -549,7 +550,7 @@ bbOverlappingEntries_t *bbGetOverlappingEntriesCore(bigWigFile_t *fp, bwOverlapB
     return output;
 
 error:
-    fprintf(stderr, "[bbGetOverlappingEntriesCore] Got an error\n");
+    BW_STDERR("[bbGetOverlappingEntriesCore] Got an error\n");
     buf = (char*)bufEnd - tmp;
     if(output) bbDestroyOverlappingEntries(output);
     if(compressed && buf) free(buf);

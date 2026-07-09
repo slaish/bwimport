@@ -5,6 +5,7 @@
 #include <math.h>
 #include "bigWig.h"
 #include "bwCommon.h"
+#include "bw_quiet.h"
 
 /// @cond SKIP
 struct val_t {
@@ -103,7 +104,7 @@ static int writeChromList(FILE *fp, chromList_t *cl) {
     size_t l;
 
     if(cl->nKeys > 1073676289) {
-        fprintf(stderr, "[writeChromList] Error: Currently only 1,073,676,289 contigs are supported. If you really need more then please post a request on github.\n");
+        BW_STDERR("[writeChromList] Error: Currently only 1,073,676,289 contigs are supported. If you really need more then please post a request on github.\n");
         return 1;
     }
     nblocks = cl->nKeys/nperblock;

@@ -5,6 +5,7 @@
 #include <zlib.h>
 #include <math.h>
 #include <string.h>
+#include "bw_quiet.h"
 
 //Returns -1 if there are no applicable levels, otherwise an integer indicating the most appropriate level.
 //Like Kent's library, this divides the desired bin size by 2 to minimize the effect of blocks overlapping multiple bins
@@ -476,7 +477,7 @@ static double *bwStatsFromZoom(bigWigFile_t *fp, int32_t level, uint32_t tid, ui
     return output;
 
 error:
-    fprintf(stderr, "got an error in bwStatsFromZoom in the range %"PRIu32"-%"PRIu32": %s\n", pos, end2, strerror(errno));
+    BW_STDERR("got an error in bwStatsFromZoom in the range %"PRIu32"-%"PRIu32": %s\n", pos, end2, strerror(errno));
     if(blocks) destroyBWOverlapBlock(blocks);
     if(output) free(output);
     return NULL;

@@ -8,6 +8,7 @@
 #include "bigWigIO.h"
 #include <inttypes.h>
 #include <errno.h>
+#include "bw_quiet.h"
  
 size_t GLOBAL_DEFAULTBUFFERSIZE;
  
@@ -87,7 +88,7 @@ CURLcode urlFetchData(URL_t *URL, unsigned long bufSize) {
                    URL->filePos, URL->filePos + (size_t)bufSize - 1U);
     rv = curl_easy_setopt(URL->x.curl, CURLOPT_RANGE, range);
     if (rv != CURLE_OK) {
-        fprintf(stderr, "[urlFetchData] Couldn't set the range (%s)\n", range);
+        BW_STDERR("[urlFetchData] Couldn't set the range (%s)\n", range);
         return rv;
     }
  
@@ -106,7 +107,7 @@ CURLcode urlFetchData(URL_t *URL, unsigned long bufSize) {
       curl_easy_getinfo(URL->x.curl, CURLINFO_SIZE_DOWNLOAD, &dlsz);
       curl_easy_getinfo(URL->x.curl, CURLINFO_RESPONSE_CODE, &code);
       curl_easy_getinfo(URL->x.curl, CURLINFO_EFFECTIVE_URL, &eff);
-      fprintf(stderr, "[bwimport] FETCH range=%zu-%zu  time=%.3fs  dl=%.0fB  http=%ld  url=%s\n",
+      BW_STDERR("[bwimport] FETCH range=%zu-%zu  time=%.3fs  dl=%.0fB  http=%ld  url=%s\n",
               URL->filePos, URL->filePos + (size_t)bufSize - 1U, ttot, dlsz, code, eff ? eff : "(nil)");
     }
     return rv;
@@ -122,7 +123,7 @@ size_t url_fread(void *obuf, size_t obufSize, URL_t *URL) {
         if (!URL->bufLen) {
             rv = urlFetchData(URL, URL->bufSize);
             if (rv != CURLE_OK) {
-                fprintf(stderr, "[url_fread] urlFetchData (A) returned %s\n", curl_easy_strerror(rv));
+                BW_STDERR("[url_fread] urlFetchData (A) returned %s\n", curl_easy_strerror(rv));
                 return 0;
             }
         } else if (URL->bufLen < URL->bufPos + remaining) {
@@ -137,7 +138,7 @@ size_t url_fread(void *obuf, size_t obufSize, URL_t *URL) {
                             : URL->bufSize;
                 rv = urlFetchData(URL, fetchSize);
                 if (rv != CURLE_OK) {
-                    fprintf(stderr, "[url_fread] urlFetchData (B) returned %s\n", curl_easy_strerror(rv));
+                    BW_STDERR("[url_fread] urlFetchData (B) returned %s\n", curl_easy_strerror(rv));
                     return 0;
                 }
             }
@@ -204,7 +205,7 @@ CURLcode urlSeek(URL_t *URL, size_t pos) {
             (void)snprintf(range, sizeof(range), "%zu-%zu", pos, pos + URL->bufSize - 1U);
             rv = curl_easy_setopt(URL->x.curl, CURLOPT_RANGE, range);
             if (rv != CURLE_OK) {
-                fprintf(stderr, "[urlSeek] Couldn't set the range (%s)\n", range);
+                BW_STDERR("[urlSeek] Couldn't set the range (%s)\n", range);
                 return rv;
             }
  
@@ -221,12 +222,12 @@ CURLcode urlSeek(URL_t *URL, size_t pos) {
              curl_easy_getinfo(URL->x.curl, CURLINFO_SIZE_DOWNLOAD, &dlsz);
              curl_easy_getinfo(URL->x.curl, CURLINFO_RESPONSE_CODE, &code);
              curl_easy_getinfo(URL->x.curl, CURLINFO_EFFECTIVE_URL, &eff);
-             fprintf(stderr, "[bwimport] SEEK  range=%s  time=%.3fs  dl=%.0fB  http=%ld  url=%s\n",
+             BW_STDERR("[bwimport] SEEK  range=%s  time=%.3fs  dl=%.0fB  http=%ld  url=%s\n",
                      range, ttot, dlsz, code, eff ? eff : "(nil)");
             }
             
             if (rv != CURLE_OK) {
-             fprintf(stderr, "[urlSeek] curl_easy_perform received an error!\n");
+             BW_STDERR("[urlSeek] curl_easy_perform received an error!\n");
             }
             errno = 0;  /* clear remnant errno */
             return rv;
@@ -266,7 +267,7 @@ URL_t *urlOpen(const char *fname, CURLcode (*callBack)(CURL*), const char *mode)
             URL->x.fp = fopen(fname, "rb");
             if (!(URL->x.fp)) {
                 free(URL);
-                fprintf(stderr, "[urlOpen] Couldn't open %s for reading\n", fname);
+                BW_STDERR("[urlOpen] Couldn't open %s for reading\n", fname);
                 return NULL;
             }
 #ifndef NOCURL
@@ -275,61 +276,61 @@ URL_t *urlOpen(const char *fname, CURLcode (*callBack)(CURL*), const char *mode)
             URL->memBuf = (unsigned char*)malloc(GLOBAL_DEFAULTBUFFERSIZE);
             if (!(URL->memBuf)) {
                 free(URL);
-                fprintf(stderr, "[urlOpen] Couldn't allocate file buffer!\n");
+                BW_STDERR("[urlOpen] Couldn't allocate file buffer!\n");
                 return NULL;
             }
             URL->bufSize = GLOBAL_DEFAULTBUFFERSIZE;
  
             URL->x.curl = curl_easy_init();
             if (!(URL->x.curl)) {
-                fprintf(stderr, "[urlOpen] curl_easy_init() failed!\n");
+                BW_STDERR("[urlOpen] curl_easy_init() failed!\n");
                 goto error;
             }
  
             if (curl_easy_setopt(URL->x.curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY) != CURLE_OK) {
-                fprintf(stderr, "[urlOpen] Failed to set CURLOPT_HTTPAUTH\n");
+                BW_STDERR("[urlOpen] Failed to set CURLOPT_HTTPAUTH\n");
                 goto error;
             }
             if (curl_easy_setopt(URL->x.curl, CURLOPT_FOLLOWLOCATION, 1L) != CURLE_OK) {
-                fprintf(stderr, "[urlOpen] Failed to set CURLOPT_FOLLOWLOCATION\n");
+                BW_STDERR("[urlOpen] Failed to set CURLOPT_FOLLOWLOCATION\n");
                 goto error;
             }
             if (curl_easy_setopt(URL->x.curl, CURLOPT_URL, fname) != CURLE_OK) {
-                fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_URL!\n");
+                BW_STDERR("[urlOpen] Couldn't set CURLOPT_URL!\n");
                 goto error;
             }
  
             /* initial warm-up range */
             (void)snprintf(range, sizeof(range), "0-%zu", URL->bufSize - 1U);
             if (curl_easy_setopt(URL->x.curl, CURLOPT_RANGE, range) != CURLE_OK) {
-                fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_RANGE (%s)!\n", range);
+                BW_STDERR("[urlOpen] Couldn't set CURLOPT_RANGE (%s)!\n", range);
                 goto error;
             }
  
             /* write callback */
             if (curl_easy_setopt(URL->x.curl, CURLOPT_WRITEFUNCTION, bwFillBuffer) != CURLE_OK) {
-                fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_WRITEFUNCTION!\n");
+                BW_STDERR("[urlOpen] Couldn't set CURLOPT_WRITEFUNCTION!\n");
                 goto error;
             }
             if (curl_easy_setopt(URL->x.curl, CURLOPT_WRITEDATA, (void*)URL) != CURLE_OK) {
-                fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_WRITEDATA!\n");
+                BW_STDERR("[urlOpen] Couldn't set CURLOPT_WRITEDATA!\n");
                 goto error;
             }
  
             /* HTTPS: ignore cert errors (keeps upstream behavior) */
             if (curl_easy_setopt(URL->x.curl, CURLOPT_SSL_VERIFYPEER, 0L) != CURLE_OK) {
-                fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_SSL_VERIFYPEER\n");
+                BW_STDERR("[urlOpen] Couldn't set CURLOPT_SSL_VERIFYPEER\n");
                 goto error;
             }
             if (curl_easy_setopt(URL->x.curl, CURLOPT_SSL_VERIFYHOST, 0L) != CURLE_OK) {
-                fprintf(stderr, "[urlOpen] Couldn't set CURLOPT_SSL_VERIFYHOST\n");
+                BW_STDERR("[urlOpen] Couldn't set CURLOPT_SSL_VERIFYHOST\n");
                 goto error;
             }
  
             if (callBack) {
                 code = callBack(URL->x.curl);
                 if (code != CURLE_OK) {
-                    fprintf(stderr, "[urlOpen] user callback error: %s\n", curl_easy_strerror(code));
+                    BW_STDERR("[urlOpen] user callback error: %s\n", curl_easy_strerror(code));
                     goto error;
                 }
             }
@@ -344,7 +345,7 @@ URL_t *urlOpen(const char *fname, CURLcode (*callBack)(CURL*), const char *mode)
         URL->x.fp = fopen(fname, mode);
         if (!(URL->x.fp)) {
             free(URL);
-            fprintf(stderr, "[urlOpen] Couldn't open %s for writing\n", fname);
+            BW_STDERR("[urlOpen] Couldn't open %s for writing\n", fname);
             return NULL;
         }
     }
