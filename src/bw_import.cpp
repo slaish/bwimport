@@ -1,6 +1,7 @@
 // [[Rcpp::depends(Rcpp)]]
 #include <Rcpp.h>
 #include <cmath>
+#include <cstring>
 #include <algorithm>
 #include <atomic>
 
@@ -52,12 +53,38 @@ inline std::string strip_chr_prefix(const std::string& s) {
 }
 
 
-// FIX: On Windows, convert paths with spaces (or non-ASCII chars) to the
-//      8.3 short-path form so that C fopen() inside libBigWig never chokes.
-//      Also normalise forward slashes — harmless but defensive.
+// Prefix-match helper (C++11-friendly; std::string::starts_with is C++20).
+inline bool starts_with_ci(const std::string& s, const char* prefix) {
+  size_t n = std::strlen(prefix);
+  if (s.size() < n) return false;
+  for (size_t i = 0; i < n; ++i) {
+    char a = s[i], b = prefix[i];
+    if (a >= 'A' && a <= 'Z') a = static_cast<char>(a - 'A' + 'a');
+    if (b >= 'A' && b <= 'Z') b = static_cast<char>(b - 'A' + 'a');
+    if (a != b) return false;
+  }
+  return true;
+}
+
+// FIX (bwimport 0.2.3): URLs must pass through UNMODIFIED on Windows.
+// The previous version unconditionally converted '/' -> '\\' on Windows,
+// which mangled http:// into http:\\... -- libBigWig then couldn't parse
+// them as URLs, libcurl's byte-range fast path was unreachable, and
+// every remote track failed silently (fopen() retrying an invalid
+// Windows path with the URL host treated as a UNC share; some hosts
+// caused a ~50s hang per file). Now on Windows: only LOCAL paths get
+// the slash-swap + 8.3-short-name treatment; URLs are returned as-is
+// so libBigWig's libcurl-backed URL open receives a well-formed URL.
 inline std::string safe_local_path(const std::string& path) {
 #ifdef _WIN32
-  // Normalise separators: forward slashes → backslashes
+  // URL -> pass through untouched; libBigWig+libcurl handle these.
+  if (starts_with_ci(path, "http://")  ||
+      starts_with_ci(path, "https://") ||
+      starts_with_ci(path, "ftp://")) {
+    return path;
+  }
+
+  // Local Windows path: normalise separators to backslashes for fopen().
   std::string norm = path;
   std::replace(norm.begin(), norm.end(), '/', '\\');
 

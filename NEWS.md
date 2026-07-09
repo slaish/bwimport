@@ -1,3 +1,19 @@
+# bwimport 0.2.3
+
+## Bug fixes
+
+* **Windows: URLs no longer mangled to `http:\\...`.** `safe_local_path()`
+  in `src/bw_import.cpp` used to unconditionally convert `/` → `\` on
+  Windows to make local paths fopen()-safe. That also mangled `http://`
+  into `http:\\...`, and libBigWig then failed to parse it as a URL --
+  every remote track failed silently, and some hosts caused a ~50 s
+  hang per file (fopen retrying an invalid Windows path with the URL
+  host treated as a UNC share). The fix restricts the slash-swap to
+  paths that don't start with `http://`, `https://`, or `ftp://`,
+  matching how R-level `bw_import()` already routes URLs vs local
+  paths. Remote plots on Windows now hit libBigWig's byte-range fast
+  path directly, same as macOS/Linux.
+
 # bwimport 0.2.2
 
 ## Bug fixes
