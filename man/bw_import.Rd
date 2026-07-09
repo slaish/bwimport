@@ -21,11 +21,29 @@ Numeric vector of length end - start + 1
 \description{
 Import BigWig region
 }
+\details{
+On Windows, remote URLs used to be *always* downloaded to a temp file
+before being passed to libBigWig, which caused very slow first plots
+(whole-file transfer per bigwig instead of a ~50 kB byte-range fetch).
+As of bwimport 0.2.2:
+
+- The default is direct URL fetching (libBigWig's own libcurl support
+  is linked in `Makevars.win`). If direct fetching fails at open time,
+  the code silently falls back to a download-then-open path.
+- Downloaded files are cached per URL for the R session, so the fallback
+  pays the transfer cost at most once per bigwig even in the failure
+  case.
+- Force the download path (skip direct fetch) with
+  `Sys.setenv(BWIMPORT_WINDOWS_DOWNLOAD = "1")` -- useful behind
+  restrictive corporate proxies where libcurl can't reach GitHub /
+  remote hosts but R's `curl` package can.
+}
 \examples{
-bw_URL = "http://genome-ftp.mbg.au.dk/public/THJ/seqNdisplayR/examples/tracks/HeLa_3pseq/siGFP_noPAP_in_batch1_plus.bw"
-chrom = "chr12"
-chrom_start = 6531808
-chrom_end = 6541078
-vals = bw_import(bw_URL, chrom, chrom_start, chrom_end)
+bw_URL <- "http://genome-ftp.mbg.au.dk/public/THJ/seqNdisplayR/examples/tracks/HeLa_3pseq/siGFP_noPAP_in_batch1_plus.bw"
+chrom <- "chr12"
+chrom_start <- 6531808
+chrom_end <- 6541078
+vals <- bw_import(bw_URL, chrom, chrom_start, chrom_end)
 max(vals) # [1] 9503.29
+
 }

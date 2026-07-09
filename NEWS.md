@@ -1,3 +1,29 @@
+# bwimport 0.2.2
+
+## Bug fixes
+
+* Windows: dramatically faster remote BigWig reads. `bw_import()` on
+  Windows used to always download the entire remote file to disk
+  before opening it, even though `Makevars.win` links libcurl into
+  libBigWig and byte-range fetches would work. First plots with many
+  tracks paid the transfer cost of every full bigwig, appearing to
+  hang for minutes on slow connections.
+
+  Now: on Windows + URL, `bw_import()` tries libBigWig's own
+  URL-open first (byte-range reads, typically ~50 kB per region).
+  Only on failure does it fall back to the old download path -- and
+  when it does, downloaded files are cached per URL for the R session,
+  so at most one transfer per bigwig.
+
+  Set `Sys.setenv(BWIMPORT_WINDOWS_DOWNLOAD = "1")` to force the
+  download path if you're behind a proxy where libcurl fails but
+  R's `curl` package succeeds.
+
+## New features
+
+* New exported helper `bw_clear_url_cache()` releases any bigwigs the
+  Windows fallback path cached under `tempdir()` during the session.
+
 # bwimport 0.2.1
 
 ## New features
